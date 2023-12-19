@@ -1,5 +1,6 @@
-import express, { response } from "express";
+import express from "express";
 import cors from "cors";
+import { searchEngine } from "./search/searchInstance";
 
 const app = express();
 
@@ -13,6 +14,9 @@ app.use(
 app.use(express.json());
 
 app.get("/ping", async (req, res) => {
+  const pages = await searchEngine.search("day");
+
+  console.log("pages :", pages);
   res.status(200).send("pong");
 });
 
@@ -21,7 +25,7 @@ const MAX_REQUESTS = 20;
 const WINDOW_MS = 5 * 1000;
 
 const limiter = (req: any, res: any, next: any) => {
-  const ip = req.ip;
+  const ip = "185.117.149.1";
   const now = Date.now();
 
   if (!requestCounts[ip] || requestCounts[ip].lastReset + WINDOW_MS < now) {
@@ -29,7 +33,7 @@ const limiter = (req: any, res: any, next: any) => {
   }
 
   if (requestCounts[ip].count >= MAX_REQUESTS) {
-    return response.status(429).json({
+    return res.status(429).json({
       error: "Too Many Requests",
       message: `Wait around ${WINDOW_MS / 1000}s`,
     });
@@ -38,5 +42,29 @@ const limiter = (req: any, res: any, next: any) => {
   requestCounts[ip].count++;
   next();
 };
+
+app.get("/search", limiter, async (req: any, res: any) => {
+  try {
+    const { query, count } = req.query;
+
+    console.log("req.query :", req.query);
+    const decodedQuery = decodeURIComponent(query as string);
+    console.log("decodedQuery :", decodedQuery);
+    const pages = await searchEngine.search(decodedQuery);
+    console.log("pages :", pages);
+    const countOfResult = count ? parseInt(count as string) : pages.length;
+
+    console.log("countOfResult :", countOfResult);
+    const result = pages.slice(0, countOfResult);
+
+    res.status(200).json({
+      count: result.length,
+      result,
+    });
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.message);
+  }
+});
 
 app.listen(3000, () => console.log("server is listening at: ", 3000));

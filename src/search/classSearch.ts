@@ -6,22 +6,26 @@ interface SearchResult {
 
 const pages: SearchResult[] = [
   {
-    content: "something1",
+    content: "Today is a very good day",
   },
   {
-    content: "something2",
+    content: "Today is a very bad day",
   },
   {
-    content: "something3",
+    content: "Today is an amazing day",
   },
 ];
 
 class SearchEngine {
   async search(query: string): Promise<SearchResult[]> {
-    const results = pages.filter((page) => {
-      new RegExp(query, "i").test(page.content);
-    });
+    console.log(query);
+    const results = pages.filter((page) =>
+      new RegExp(query, "i").test(page.content)
+    );
 
+    console.log(" results from search :", results);
     return results;
   }
 }
+
+export { SearchEngine };

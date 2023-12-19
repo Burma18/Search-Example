@@ -14,9 +14,6 @@ app.use(
 app.use(express.json());
 
 app.get("/ping", async (req, res) => {
-  const pages = await searchEngine.search("day");
-
-  console.log("pages :", pages);
   res.status(200).send("pong");
 });
 
@@ -47,14 +44,12 @@ app.get("/search", limiter, async (req: any, res: any) => {
   try {
     const { query, count } = req.query;
 
-    console.log("req.query :", req.query);
     const decodedQuery = decodeURIComponent(query as string);
-    console.log("decodedQuery :", decodedQuery);
+
     const pages = await searchEngine.search(decodedQuery);
-    console.log("pages :", pages);
+
     const countOfResult = count ? parseInt(count as string) : pages.length;
 
-    console.log("countOfResult :", countOfResult);
     const result = pages.slice(0, countOfResult);
 
     res.status(200).json({

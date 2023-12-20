@@ -18,8 +18,8 @@ app.get("/ping", async (req, res) => {
 });
 
 const requestCounts: Record<string, { count: number; lastReset: number }> = {};
-const MAX_REQUESTS = 20;
-const WINDOW_MS = 5 * 1000;
+const MAX_REQUESTS = 2;
+const WINDOW_MS = 8 * 1000;
 
 const limiter = (req: any, res: any, next: any) => {
   const ip = "185.117.149.1";
@@ -29,6 +29,7 @@ const limiter = (req: any, res: any, next: any) => {
     requestCounts[ip] = { count: 0, lastReset: now };
   }
 
+  console.log(requestCounts[ip]);
   if (requestCounts[ip].count >= MAX_REQUESTS) {
     return res.status(429).json({
       error: "Too Many Requests",
